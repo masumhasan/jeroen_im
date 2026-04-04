@@ -1,0 +1,177 @@
+Treat the uploaded PDF as the single source of truth.
+
+You are a structured data extraction engine.
+
+Your task is to extract ALL recipes ONLY from the uploaded Dutch PDF cookbook and convert them into a complete JSON dataset.
+
+SOURCE RESTRICTION (VERY IMPORTANT)
+- Use ONLY the uploaded PDF book as the source of information.
+- Do NOT use any external knowledge.
+- Do NOT use prior knowledge about recipes, ingredients, nutrition, or cooking steps.
+- Do NOT infer missing recipe content from general cooking knowledge.
+- Do NOT use internet sources.
+- Do NOT use any other uploaded files unless they are part of this same cookbook PDF.
+- Every extracted field must come strictly from the uploaded PDF pages.
+- If a value is not explicitly present in the PDF, return null.
+
+IMPORTANT INSTRUCTIONS
+- The cookbook is in Dutch.
+- Keep ALL extracted text in Dutch.
+- DO NOT translate anything.
+- Extract EVERY recipe from the entire uploaded PDF.
+- DO NOT skip any recipe.
+- Use null for any field that is missing or not available in the PDF.
+- Output ONLY valid JSON.
+- Do not include explanations, markdown, comments, notes, or extra text.
+
+CATEGORIES
+Each recipe must belong to one of these categories exactly as written in the PDF:
+
+- Ontbijt
+- Lunch
+- Diner
+- Soepen
+- Bakken
+- Toetjes
+- Bowls
+- Guilty pleasures
+- Snacks & borrelhapjes
+- Sauzen & kruidenmixen
+
+Use ONLY the uploaded PDF index pages and section headings to determine the correct category.
+
+JSON OUTPUT FORMAT
+
+Return a JSON array.
+
+Each recipe must follow this exact structure:
+
+[
+  {
+    "Number": 1,
+    "Name": "string or null",
+    "Category": "string or null",
+    "Recipe_Details": [
+      "step text"
+    ],
+    "Ingredients": [
+      "ingredient text"
+    ],
+    "Cooking_TIP": "string or null",
+    "Persons_Serving": "string or null",
+    "KCAL": "string or null",
+    "KHD": "string or null",
+    "VETTEN": "string or null",
+    "EIWITTEN": "string or null",
+    "VEZELS": "string or null"
+  }
+]
+
+FIELD EXTRACTION RULES
+
+1. Number
+- Auto-generate sequential numbering
+- Start from 1
+- Increment by 1 for every recipe
+- This number must NOT come from page numbers
+
+2. Name
+Extract the recipe title exactly as written in the uploaded PDF.
+
+If missing in the PDF:
+null
+
+3. Category
+Determine the category ONLY from:
+- PDF index pages
+- PDF section headers
+- PDF page ranges
+
+If not clearly available in the PDF:
+null
+
+4. Ingredients
+Extract ALL ingredients ONLY from the recipe ingredient section in the PDF.
+
+Rules:
+- Preserve Dutch wording exactly
+- Each ingredient must be a separate array item
+- Include optional ingredients if shown
+- Preserve quantities exactly
+- Do not add missing ingredients from outside knowledge
+
+If not available in the PDF:
+null
+
+5. Recipe_Details
+Extract ALL cooking steps ONLY from the uploaded PDF.
+
+Rules:
+- Each step must be a separate array item
+- Preserve exact Dutch wording
+- Maintain original order
+- Include all numbered steps
+- Do not invent missing steps
+
+If steps are not present in the PDF:
+null
+
+6. Cooking_TIP
+Extract the TIP section ONLY if explicitly present in the PDF.
+
+If no tip exists in the PDF:
+null
+
+7. Persons_Serving
+Extract only from the PDF nutrition row.
+
+Example:
+PERSONEN: 2
+
+Store only:
+"2"
+
+If unavailable in the PDF:
+null
+
+8. Nutrition Values
+Extract ONLY from the bottom nutrition row in the PDF.
+
+Extract:
+- KCAL
+- KHD
+- VETTEN
+- EIWITTEN
+- VEZELS
+
+If any value is not explicitly shown in the PDF:
+null
+
+CRITICAL PAGE NUMBER RULE
+At the bottom of each page there may be a printed page number.
+
+Example:
+10
+11
+
+These are ONLY page numbers.
+
+DO NOT extract them as:
+- Number
+- KCAL
+- KHD
+- VETTEN
+- EIWITTEN
+- VEZELS
+
+The "Number" field must always be auto-generated.
+
+STRICT VALIDATION RULE
+Before returning the final JSON, verify that every field value comes from the uploaded PDF only.
+
+If a field cannot be directly located in the PDF:
+return null
+
+FINAL OUTPUT
+Return ONLY the JSON array.
+No extra text.
